@@ -1,0 +1,291 @@
+<html>
+  <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=default"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      h1 {
+        text-align: center;
+      }
+
+      .container {
+        margin: 0 auto;
+        padding: 60px 20%;
+      }
+
+      figure {
+        text-align: center;
+      }
+
+      img {
+        display: inline-block;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>CS184/284A Spring 2025 Homework 4 Write-Up</h1>
+      <div style="text-align: center">Names: Yun Chung Chang</div>
+
+      <br />
+
+      Link to webpage: (TODO)
+      <a href="https://cs184.eecs.berkeley.edu/sp25"
+        >cs184.eecs.berkeley.edu/sp25</a
+      >
+
+      <br />
+
+      Link to GitHub repository: (TODO)
+      <a href="https://github.com/cal-cs184-student/sp25-hw4-cory105"
+        >https://github.com/cal-cs184-student/sp25-hw4-cory105</a
+      >
+
+      <figure>
+        <img
+          src="images/clothsim.png"
+          alt="Cloth draped over sphere"
+          style="width: 70%"
+        />
+        <figcaption>Cloth Simulation!</figcaption>
+      </figure>
+
+      <!--
+		We've already added one heading per part, to make your write-up as navigable when grading. Please fit your write-up within these sections!
+		-->
+
+      <h2>Overview</h2>
+      In this project, we go over different techniques for cloth simulation
+      using a point mass + spring system. In part1, we construct the cloth using
+      point mass and spring, we then calculate the force on each point mass to
+      simulate its position at each timestep using verlet integration in part 2.
+      In part 3, we implement collision with obstacles to make sure the cloth
+      will interact correctly when collide with sphere and plane, so it won't
+      just clip through or ignore the obstacles. We then implement self
+      collision to make sure that the cloth won't clip through itself but
+      instead fold on itself during simulation to make the process more
+      realistic in part 4. At last in part 5, we implement some interesting
+      shaders using GLSL to make the scene more realistic or interesting. We
+      also implement bump mapping and displacement mapping to get some illusion
+      of detail (bumps) as well as changes in object geometry.
+
+      <h2>Part 1: Masses and springs</h2>
+      In this part, we construct the cloth using a point mass + springs system.
+      We first create all the point masses and store them into a vector in a row
+      major order, we then create all the springs that we need for the system.
+      Over here, depends on the position of the point mass, it may or may not
+      have all the constraints springs, like for the point masses on the left
+      most edge, they shouldn't have a spring that connects to its left since
+      that doesn't exist, so we need to consider the edge cases carefully.
+
+      <p>
+        Here are the results: (The pictures maybe alisasing on the webpage, zoom
+        in will probably fix the problem). Note that even I zoom in to the
+        extreme on my side, there are still some aliasing, so I added the zoomed
+        in pictures just to make sure.
+      </p>
+      <div style="display: flex; flex-direction: column; align-items: center">
+        <table
+          style="width: 100%; text-align: center; border-collapse: collapse"
+        >
+          <tr>
+            <td style="text-align: center">
+              <img src="images/wireframe_only_shearing.png" width="400px" />
+              <figcaption>Only Shearing</figcaption>
+            </td>
+            <td style="text-align: center">
+              <img src="images/zoom_in_only_shearing.png" width="400px" />
+              <figcaption>Only Shearing (zoomed in)</figcaption>
+            </td>
+          </tr>
+          <tr>
+            <td style="text-align: center">
+              <img src="images/wireframe_no_shearing.png" width="400px" />
+              <figcaption>No Shearing</figcaption>
+            </td>
+            <td style="text-align: center">
+              <img src="images/zoom_in_no_shearing.png" width="400px" />
+              <figcaption>No Shearing (zoomed in)</figcaption>
+            </td>
+          </tr>
+          <tr>
+            <td style="text-align: center">
+              <img src="images/wireframe.png" width="400px" />
+              <figcaption>With all constraints.</figcaption>
+            </td>
+            <td style="text-align: center">
+              <img src="images/zoom_in_all.png" width="400px" />
+              <figcaption>With all constraints (zoomed in)</figcaption>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <h2>Part 2: Simulation via numerical integration</h2>
+      In this part, we are trying to simulate the motion of the cloth at each
+      time step. Which we first compute the force due to external acceleration
+      (ex. gravity) on all the point masses, we then compute all the forces due
+      to the springs in the system on each point mass using Hook's Law. After we
+      have all the forces calculated and sumed up correctly for each pointt
+      mass, we then can compute the position of each point mass using Verlet
+      Integration. At last, we need to add the constraints to the positions of
+      all the point masses so that all the springs can't streched over 10% of
+      its rest length.
+
+      <p>
+        Here are the final results comparing different properties of the cloth:
+      </p>
+
+      <figure>
+        <img
+          src="images/orig_pinn2.png"
+          alt="Original Cloth Simulation"
+          style="width: 70%"
+        />
+        <figcaption>
+          Cloth simulation for pinned_2 with default properties (k_s = 5000,
+          density = 15 g/cm^2, damping = 0.2)
+        </figcaption>
+      </figure>
+
+      <div style="display: flex; flex-direction: column; align-items: center">
+        <table
+          style="width: 100%; text-align: center; border-collapse: collapse"
+        >
+          <tr>
+            <td style="text-align: center">
+              <img src="images/pinn2_ks=50000.png" width="400px" />
+              <figcaption>High k_s (k_s = 50000)</figcaption>
+            </td>
+            <td style="text-align: center">
+              <img src="images/pinn2_ks=500.png" width="400px" />
+              <figcaption>Low k_s (k_s = 500)</figcaption>
+            </td>
+          </tr>
+          <tr>
+            <td style="text-align: center">
+              <img src="images/pinn2_density=75.png" width="400px" />
+              <figcaption>High Density (density = 75 g/cm^2)</figcaption>
+            </td>
+            <td style="text-align: center">
+              <img src="images/pinn2_density=3.png" width="400px" />
+              <figcaption>Low Density (density = 3 g/cm^2)</figcaption>
+            </td>
+          </tr>
+          <tr>
+            <td style="text-align: center">
+              <img src="images/pinn2_damping=0.71.png" width="400px" />
+              <figcaption>High Damping (damping ~ 0.71)</figcaption>
+            </td>
+            <td style="text-align: center">
+              <img src="images/pinn2_damping=0.035.png" width="400px" />
+              <figcaption>Low Damping (damping ~ 0.035)</figcaption>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <p>
+        As we can see, with higher k_s, the cloth is more stiff, and with lower
+        k_s, the cloth is more soft. This make snese since according to Hook's
+        Lae, the force between the spring is proportional to the spring
+        constant, with higher k_s, the force is bigger, so it will bring the
+        particles closer, and with lower k_s, the force is smaller and the cloth
+        will be looser.
+      </p>
+
+      <p>
+        For denisty, the result is quite expected. With higher density, the mass
+        of each point mass is higher, which will end up with greater weights, so
+        it require more forces from the spring to "pick up" the particles. So as
+        we can see in the pictures, with higher density, the cloth has a bigger
+        bump on the top, and with lower density, the bump is smaller.
+      </p>
+
+      <p>
+        At last, for damping, which is quite hard to show its effect using only
+        pictures. In general, damping is for simulating the loss of energy due
+        to friction, heat loss, and other effects. So with higher damping, the
+        falling speed of the cloth is really slow as energy is rapidly lost,
+        which I was able to take a screenshot during the falling quite easily.
+        And for lower damping, the energy loss is almost 0, which the cloth will
+        keep swinging back and forth for a while before it comes to an end. And
+        the screenshot was taken when it was still swinging.
+      </p>
+
+      <figure>
+        <img
+          src="images/pinn4.png"
+          alt="Original Cloth Simulation"
+          style="width: 70%"
+        />
+        <figcaption>
+          Cloth simulation for pinned_4 with default properties (k_s = 5000,
+          density = 15 g/cm^2, damping = 0.2)
+        </figcaption>
+      </figure>
+
+      <h2>Part 3: Handling collisions with other objects</h2>
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+      tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
+      veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
+      commodo consequat. Duis aute irure dolor in reprehenderit in voluptate
+      velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
+      cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id
+      est laborum.
+
+      <h2>Part 4: Handling self-collisions</h2>
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+      tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
+      veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
+      commodo consequat. Duis aute irure dolor in reprehenderit in voluptate
+      velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
+      cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id
+      est laborum.
+
+      <h2>Part 5: Shaders</h2>
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+      tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
+      veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
+      commodo consequat. Duis aute irure dolor in reprehenderit in voluptate
+      velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
+      cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id
+      est laborum.
+
+      <h2>
+        (Optional) Part 6: Extra Credit - Additional cloth simulation features!
+      </h2>
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+      tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
+      veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
+      commodo consequat. Duis aute irure dolor in reprehenderit in voluptate
+      velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
+      cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id
+      est laborum.
+
+      <h2>Additional Notes (please remove)</h2>
+      <ul>
+        <li>
+          You can also add code if you'd like as so: <code>code code code</code>
+        </li>
+        <li>
+          If you'd like to add math equations,
+          <ul>
+            <li>
+              You can write inline equations like so: \( a^2 + b^2 = c^2 \)
+            </li>
+            <li>
+              You can write display equations like so: \[ a^2 + b^2 = c^2 \]
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </body>
+</html>

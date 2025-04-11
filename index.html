@@ -36,8 +36,8 @@
       <br />
 
       Link to webpage: (TODO)
-      <a href="https://cs184.eecs.berkeley.edu/sp25"
-        >cs184.eecs.berkeley.edu/sp25</a
+      <a href="https://zx40224617.github.io/CS184Project4/"
+        >https://zx40224617.github.io/CS184Project4/</a
       >
 
       <br />
@@ -232,13 +232,94 @@
       </figure>
 
       <h2>Part 3: Handling collisions with other objects</h2>
-      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-      tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
-      veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-      commodo consequat. Duis aute irure dolor in reprehenderit in voluptate
-      velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
-      cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id
-      est laborum.
+      In this part, we are handling the collision between the cloth and other
+      obstacles, which is a sphere and a place. For both of the collision, we
+      first need to check whether is there any collision or not, and calculate
+      the correction vector based on the collision point, and apply the
+      collision vector to the point mass's last position with some scaling to
+      get a correct final position.
+
+      <br />
+      <br />
+      <br />
+
+      <p>
+        For sphere, we check whether there is collision or not by checking
+        whether the point mass is within the radius of the sphere. We then
+        calculate the tangent point by getting the unit direction vector from
+        the center to the point mass current position, and times the radius to
+        get the point on the sphere surface. We can now get the correction
+        vector easily by subtract the point mass's lat position from the
+        tangent, and the correction vector back to the point mass's last
+        position with the sclaing of (1 - f) to get the final position of the
+        point mass.
+      </p>
+
+      <figure>
+        <img
+          src="images/sphere_ks=5000.png"
+          alt="Original Cloth Simulation"
+          style="width: 70%"
+        />
+        <figcaption>Sphere with k_s = 5000</figcaption>
+      </figure>
+
+      <figure>
+        <img
+          src="images/sphere_ks=500.png"
+          alt="Original Cloth Simulation"
+          style="width: 70%"
+        />
+        <figcaption>Sphere with k_s = 500</figcaption>
+      </figure>
+
+      <figure>
+        <img
+          src="images/sphere_ks=50000.png"
+          alt="Original Cloth Simulation"
+          style="width: 70%"
+        />
+        <figcaption>Sphere with k_s = 50000</figcaption>
+      </figure>
+
+      <p>
+        As we discussed above, with higher k_s, the cloth is more stiff, where
+        you can see the same effect here. And for lower k_s, the cloth is more
+        soft and loose, which is also shown here as well.
+      </p>
+
+      <p>
+        For plane, we are using the ray-plane collision idea. Which the ray is
+        simply the unit vector ir current position minus the last position. If
+        the y coordinates of current position is lower than the plane, and the y
+        coordinates of the last position is above the plane, we consider that as
+        a collision. (Note that this only works or a flat plane where y is
+        uniform, but it serves well for our purpose in the project). We then
+        calculate the time of collision using the ray-plane collision fomula for
+        the tangent point. Over here, we set the y position of the tangent point
+        to be slightly above the plane using SURFACE_OFFSET a provided. And the
+        rest of the logic is the same as in sphere collision, calculate the
+        correction and add it back to last position with the scaling of (1 - f)
+        to get the final psotion.
+      </p>
+
+      <figure>
+        <img
+          src="images/plane.png"
+          alt="Original Cloth Simulation"
+          style="width: 70%"
+        />
+        <figcaption>Plane Collision</figcaption>
+      </figure>
+
+      <figure>
+        <img
+          src="images/plane_zoom_in.png"
+          alt="Original Cloth Simulation"
+          style="width: 70%"
+        />
+        <figcaption>Plane Collsion (zoomed in)</figcaption>
+      </figure>
 
       <h2>Part 4: Handling self-collisions</h2>
       Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod

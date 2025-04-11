@@ -322,13 +322,110 @@
       </figure>
 
       <h2>Part 4: Handling self-collisions</h2>
-      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-      tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
-      veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-      commodo consequat. Duis aute irure dolor in reprehenderit in voluptate
-      velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
-      cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id
-      est laborum.
+      In this part, we are dealing with self collision, which we want to avoid
+      the cloth from clipping thorugh itself, but folding on itself instead. At
+      first, we need to create a hash table that the key is generated using the
+      position of the point mass that map it to a float that represent a 3D box
+      volume. using the equation for w, h, and t provided in the spec, we just
+      truncated x, y, z coordinates of the point mass using modular and come up
+      with some uniqe number at last (we use (z + x * y) * 3, but there are a
+      lot more possible way)
+
+      <br />
+      <br />
+
+      After we have all the keys, we now need to build the spatial map using the
+      keys.We simply just loop over all the point masses, and calculate its key,
+      if the key already exits, push back the point mass to the vector, if the
+      key does not exist, create a new vector, store it into the map, annd push
+      back the point mass.
+
+      <br />
+      <br />
+
+      At last, after we have the spatial map, we need to check whether there is
+      self collsion or not and adjust the point mass position. For a given point
+      mass, we loop over all the other point masses that is in the same class as
+      it, we check whether the distance between then is small enough to consider
+      as a collision (less than 2 * thickness), and we calculate an overall
+      correction vector that will pull the given point mass from colliding with
+      all the other point masses in the same class. Note that we need to skip
+      "self colliding point mass" since a pointmass will always "collide with
+      itself". We then scale the correction vector using simulation_steps. In
+      the simulate() function, we simply just create the spatial map, and call
+      self_collide() function on every pointmass.
+
+      <figure>
+        <img
+          src="images/early.png"
+          alt="Original Cloth Simulation"
+          style="width: 70%"
+        />
+        <figcaption>Early Self Collision</figcaption>
+      </figure>
+
+      <figure>
+        <img
+          src="images/middle.png"
+          alt="Original Cloth Simulation"
+          style="width: 70%"
+        />
+        <figcaption>Initial Self Collision</figcaption>
+      </figure>
+
+      <figure>
+        <img
+          src="images/final.png"
+          alt="Original Cloth Simulation"
+          style="width: 70%"
+        />
+        <figcaption>Rest Self Collision</figcaption>
+      </figure>
+
+      <div style="display: flex; flex-direction: column; align-items: center">
+        <table
+          style="width: 100%; text-align: center; border-collapse: collapse"
+        >
+          <tr>
+            <td style="text-align: center">
+              <img src="images/falling_high_den.png" width="400px" />
+              <figcaption>Self Collision with High Density</figcaption>
+            </td>
+            <td style="text-align: center">
+              <img src="images/falling_low_den.png" width="400px" />
+              <figcaption>Self Collision with Low Density</figcaption>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <p>
+        AS we can see, with higher density the cloth falls really fast and
+        become flat easily, and with lower density, the cloth will be more
+        fluffy after self collision.
+      </p>
+
+      <div style="display: flex; flex-direction: column; align-items: center">
+        <table
+          style="width: 100%; text-align: center; border-collapse: collapse"
+        >
+          <tr>
+            <td style="text-align: center">
+              <img src="images/falling_high_ks.png" width="400px" />
+              <figcaption>Self Collision with High k_s</figcaption>
+            </td>
+            <td style="text-align: center">
+              <img src="images/falling_low_ks.png" width="400px" />
+              <figcaption>Self Collision with Low k_s</figcaption>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <p>
+        AS we can see, with higher k_s the cloth it stiff and hard to fold, and
+        with lower k_s the cloth is really soft and can be folded easily.
+      </p>
 
       <h2>Part 5: Shaders</h2>
       Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod

@@ -370,7 +370,7 @@
           alt="Original Cloth Simulation"
           style="width: 70%"
         />
-        <figcaption>Initial Self Collision</figcaption>
+        <figcaption>Mid Self Collision</figcaption>
       </figure>
 
       <figure>
@@ -400,9 +400,10 @@
       </div>
 
       <p>
-        AS we can see, with higher density the cloth falls really fast and
-        become flat easily, and with lower density, the cloth will be more
-        fluffy after self collision.
+        Although it is not quite obvious using only a screenshot, but with
+        higher density the cloth falls really fast and become flat easily due to
+        its heavy weight, and with lower density, the cloth will be more fluffy
+        after self collision because it is light.
       </p>
 
       <div style="display: flex; flex-direction: column; align-items: center">
@@ -423,47 +424,193 @@
       </div>
 
       <p>
-        AS we can see, with higher k_s the cloth it stiff and hard to fold, and
-        with lower k_s the cloth is really soft and can be folded easily.
+        As we discuss above for the effect of k_s, with higher k_s the cloth is
+        stiff and hard to fold, and with lower k_s the cloth is really soft and
+        can be folded easily.
       </p>
 
       <h2>Part 5: Shaders</h2>
-      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-      tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
-      veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-      commodo consequat. Duis aute irure dolor in reprehenderit in voluptate
-      velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
-      cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id
-      est laborum.
+      In Project 3, we implement shader on objects for showing different
+      textures using ray tracing which runs on CPU, in this part, we are going
+      to implement the same shader using a shader program that is a lot more
+      efficient and suitable for real-time applicaton. A shader programs are
+      isolated program that runs parallel on GPU for creating shading effects,
+      which is a lot faster than running on CPU. In shader program, a vertex
+      shader reads and write per-vertex values interpolated using barycentric
+      coordinates. Then the fragment shader will read the output of the vertex
+      shader and write all the per-pixel values which output the final color of
+      the pixel.
 
-      <h2>
-        (Optional) Part 6: Extra Credit - Additional cloth simulation features!
-      </h2>
-      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-      tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
-      veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-      commodo consequat. Duis aute irure dolor in reprehenderit in voluptate
-      velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
-      cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id
-      est laborum.
+      <br />
+      <br />
 
-      <h2>Additional Notes (please remove)</h2>
-      <ul>
-        <li>
-          You can also add code if you'd like as so: <code>code code code</code>
-        </li>
-        <li>
-          If you'd like to add math equations,
-          <ul>
-            <li>
-              You can write inline equations like so: \( a^2 + b^2 = c^2 \)
-            </li>
-            <li>
-              You can write display equations like so: \[ a^2 + b^2 = c^2 \]
-            </li>
-          </ul>
-        </li>
-      </ul>
-    </div>
+      Blinn-Phong shading is a shader that simulate the reflection from the
+      light source on objects with different texture and propertuees that
+      consist of 3 different parts of shading. Diffuse is the shading
+      independent of the view direction, specular is the shading that depends on
+      view direction, and ambient is the shading that doesn't depends on
+      anything. We combine all 3 of them together to get the final Phong
+      reflection. And in this part, we implement some shaders including
+      Blinn-Phong shading using the GLSL shader program, here are some results:
+
+      <div style="display: flex; flex-direction: column; align-items: center">
+        <table
+          style="width: 100%; text-align: center; border-collapse: collapse"
+        >
+          <tr>
+            <td style="text-align: center">
+              <img src="images/only_diffuse.png" width="400px" />
+              <figcaption>Only Diffuse</figcaption>
+            </td>
+            <td style="text-align: center">
+              <img src="images/only_ambient.png" width="400px" />
+              <figcaption>Only Ambient</figcaption>
+            </td>
+          </tr>
+          <tr>
+            <td style="text-align: center">
+              <img src="images/specualr.png" width="400px" />
+              <figcaption>Only specular</figcaption>
+            </td>
+            <td style="text-align: center">
+              <img src="images/Phong.png" width="400px" />
+              <figcaption>Blinn-Phong</figcaption>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <br />
+      <br />
+
+      We also implement the texture mapping shader, here is the result:
+      <figure>
+        <img
+          src="images/logo_texture.png"
+          alt="Original Cloth Simulation"
+          style="width: 70%"
+        />
+        <figcaption>Berkeley logo texture mapping</figcaption>
+      </figure>
+
+      We also implement the bump mapping and displacement mapping, here is the result: 
+    
+      <div style="display: flex; flex-direction: column; align-items: center">
+        <table
+          style="width: 100%; text-align: center; border-collapse: collapse"
+        >
+          <tr>
+            <td style="text-align: center">
+              <img src="images/bump_cloth.png" width="400px" />
+              <figcaption>Bump Mapping on the Cloth</figcaption>
+            </td>
+            <td style="text-align: center">
+              <img src="images/bump_sphere.png" width="400px" />
+              <figcaption>Bump Mapping on the Spherd</figcaption>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="text-align: center">
+              <img src="images/displacement_cloth.png" width="400px" />
+              <figcaption>Displacement Mapping on the Cloth</figcaption>
+            </td>
+            <td style="text-align: center">
+              <img src="images/displacement_sphere.png" width="400px" />
+              <figcaption>Displacement Mapping on the Spherd</figcaption>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <p>
+        Although the results for both mapping looks similar, but the core idea is totally 
+        different. For bump mapping, what we are doing here is just modify the normal vectors 
+        to make the illusions of the bumps on an object, there is no change in the original mesh 
+        geometry at all. So as you can see above, even though we can see the bumps on the sphere, 
+        there is no change in mesh geometry that it is still a perfect sphere. On the other hand, 
+        displacement mapping modify the position of each vertex based on the reading from the height map, 
+        so the normals will also be recalculated based on the new geometrey to create the bump illusion. In this case, 
+        the geometry of the sphere also changes but not just the normals. So as we can see in the
+        above picture, there are some up and downs on the surface of the sphere in displacement mapping, 
+        but not a perfect sphere, which the geometrey is not the same as before. 
+      </p>
+
+      <br/> 
+      <br/> 
+
+      We also test how the sphere resolution can affect the bump mapping and displacemenet mapping, 
+      here are the results: 
+
+      <div style="display: flex; flex-direction: column; align-items: center">
+        <table
+          style="width: 100%; text-align: center; border-collapse: collapse"
+        >
+          <tr>
+            <td style="text-align: center">
+              <img src="images/bump_low_res.png" width="400px" />
+              <figcaption>Bump Mapping low res (-o 16 -a 16)</figcaption>
+            </td>
+            <td style="text-align: center">
+              <img src="images/bump_high_res.png" width="400px" />
+              <figcaption>Bump Mapping high res (-o 128 -a 128)</figcaption>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="text-align: center">
+              <img src="images/displacement_low_res.png" width="400px" />
+              <figcaption>Displacement Mapping low res (-o 16 -a 16)</figcaption>
+            </td>
+            <td style="text-align: center">
+              <img src="images/dis_high_res.png" width="400px" />
+              <figcaption>Displacement Mapping low res (-o 128 -a 128)</figcaption>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <p> 
+        As we can see above, there are cleear straight lines that consist 
+        the circumfrence of the low resolution sphere. And for the high resolution sphere, 
+        we can't really tell there are any straight lines or not, which is more like a perfect 
+        sphere. The difference between the sphere in bump mapping is quite subtle. Which in 
+        low resolution, the bumps are stiff and consist of some striaght lines, where the bumps 
+        in high resolution is more curvy and smooth. And for displacement mapping, 
+        we can clearly see that the geometry of the sphere in high resolution is more complex 
+        and smooth where the geometry in low res is quite abrupt and corny. 
+      </p>
+
+      <br/> 
+      <br/> 
+      At last, we also implement mirror shader, here is the result: 
+
+
+      <div style="display: flex; flex-direction: column; align-items: center">
+        <table
+          style="width: 100%; text-align: center; border-collapse: collapse"
+        >
+          <tr>
+            <td style="text-align: center">
+              <img src="images/mirror_cloth.png" width="400px" />
+              <figcaption>Mirror Shader Cloth</figcaption>
+            </td>
+            <td style="text-align: center">
+              <img src="images/mirror_sphere.png" width="400px" />
+              <figcaption>Mirror Shader Sphere</figcaption>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <figure>
+        <img
+          src="images/mirror_total.png"
+          alt="Original Cloth Simulation"
+          style="width: 70%"
+        />
+        <figcaption>Mirror Shader Simulation</figcaption>
+      </figure>
+
   </body>
 </html>
